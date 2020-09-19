@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
+#include "ESPAsyncTCP.h"
+#include "ESPAsyncWebServer.h"
 #include "DHT.h"
 #include "main.h"
 
@@ -19,7 +20,7 @@ DHT dht(DHTPin, DHTTYPE);
 float temperature;
 float humidity;
 
-ESP8266WebServer server(8080);
+AsyncWebServer server(8080);
 
 void setup() {
   Serial.begin(9800);
@@ -34,31 +35,31 @@ void setup() {
 }
 
 void loop() {
-  server.handleClient();
   digitalWrite(LED_INDICATOR, HIGH);
-  delay(10000);
+  delay(5000);
   digitalWrite(LED_INDICATOR, LOW);
-  delay(30);
+  delay(10);
 }
 
 
 void setupServer(void) {
-  server.on("/", handle_OnConnect);
-  server.onNotFound(handle_NotFound);
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    //temperature = dht.readTemperature(); // Gets temperature value
+    //humidity = dht.readHumidity(); // Gets humidity value
+    temperature = 32;
+    humidity = 78;
+    request->send(200, "text/html", SendHTML(temperature, humidity)); 
+    Serial.print("Temperature: "); Serial.print((int)temperature); Serial.println(" *C");
+    Serial.print("Humidity: "); Serial.print((int)humidity); Serial.println(" %");
+  });
+  //server.onNotFound(handle_NotFound);
   server.begin();
   Serial.println("HTTP server started");
 }
 
-void handle_NotFound() {
-  server.send(404, "text/plain", "Not found");
-}
-void handle_OnConnect() {
-  temperature = dht.readTemperature(); // Gets the values of the temperature
-  humidity = dht.readHumidity(); // Gets the values of the humidity
-  server.send(200, "text/html", SendHTML(temperature, humidity)); 
-  Serial.print("Temperature: "); Serial.print((int)temperature); Serial.println(" *C");
-  Serial.print("Humidity: "); Serial.print((int)humidity); Serial.println(" %");
-}
+// void handle_NotFound() {
+//   server.send(404, "text/plain", "Not found");
+// }
 
 String SendHTML(float temperature, float humidity) {
   String ptr = "<!DOCTYPE html> <html>\n";
