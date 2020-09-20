@@ -4,6 +4,7 @@
 #include "ESPAsyncWebServer.h"
 #include "DHT.h"
 #include "main.h"
+#include "Blink.h"
 
 #include "credentials.h"
 
@@ -11,8 +12,9 @@
 
 // DHT Sensor
 const uint8_t DHTPin = D2;
-// DHT Sensor
-const uint8_t LED_INDICATOR = D0; 
+// LED Indicator
+const uint8_t LED_INDICATOR = D0;
+Led led_indicator(LED_INDICATOR);
                
 // Initialize DHT sensor.
 DHT dht(DHTPin, DHTTYPE);                
@@ -26,40 +28,31 @@ void setup() {
   Serial.begin(9800);
   delay(100);
 
-  pinMode(LED_INDICATOR, OUTPUT);
-
   pinMode(DHTPin, INPUT);
   dht.begin();
   connectToWifi();
   setupServer();
+  // led_indicator.setup();
+  temperature = dht.readTemperature(); // Gets temperature value
+  Serial.print("Temperature: "); Serial.print((int)temperature); Serial.println(" *C");
 }
 
 void loop() {
-  digitalWrite(LED_INDICATOR, HIGH);
-  delay(5000);
-  digitalWrite(LED_INDICATOR, LOW);
-  delay(10);
+  // led_indicator.blink(5, 4000);
 }
 
 
 void setupServer(void) {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    //temperature = dht.readTemperature(); // Gets temperature value
-    //humidity = dht.readHumidity(); // Gets humidity value
-    temperature = 32;
-    humidity = 78;
+    temperature = dht.readTemperature(); // Gets temperature value
+    humidity = dht.readHumidity(); // Gets humidity value
     request->send(200, "text/html", SendHTML(temperature, humidity)); 
     Serial.print("Temperature: "); Serial.print((int)temperature); Serial.println(" *C");
     Serial.print("Humidity: "); Serial.print((int)humidity); Serial.println(" %");
   });
-  //server.onNotFound(handle_NotFound);
   server.begin();
   Serial.println("HTTP server started");
 }
-
-// void handle_NotFound() {
-//   server.send(404, "text/plain", "Not found");
-// }
 
 String SendHTML(float temperature, float humidity) {
   String ptr = "<!DOCTYPE html> <html>\n";
