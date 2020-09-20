@@ -1,38 +1,36 @@
 #include <Arduino.h>
 #include "Blink.h"
 
-Led::Led(uint8_t pin) {
-    _pin = pin;
+Led::Led(uint8_t pin) : AsyncPin(pin, OUTPUT) {
+    init();
+}
+
+void Led::init() {
+    _STATUS = HIGH;
 }
 
 void Led::on() {
-    _status = LOW;
-    digitalWrite(_pin, LOW);
+    _STATUS = LOW;
+    digitalWrite(_PIN, LOW);
 }
 
 void Led::off() {
-    _status = HIGH;
-    digitalWrite(_pin, HIGH);
+    _STATUS = HIGH;
+    digitalWrite(_PIN, HIGH);
 }
 
-void Led::setup() {
-    pinMode(_pin, OUTPUT);
-    prev_ts = 0;
-    curr_ts = millis();
-}
-
-void Led::blink(unsigned long _on_delay, unsigned long _off_delay, unsigned long _cycle_delay) {
-    delay(_cycle_delay);
-    curr_ts = millis();
-    if (_status == LOW) { // The led is on
-        if (curr_ts - prev_ts >= _on_delay) {
-            prev_ts = curr_ts;
+void Led::blink(unsigned long on_delay, unsigned long off_delay, unsigned long cycle_delay) {
+    delay(cycle_delay);
+    _curr_ts = millis();
+    if (_STATUS == LOW) { // The led is on
+        if (_curr_ts - _prev_ts >= on_delay) {
+            _prev_ts = _curr_ts;
             off();
         }
     }
     else { // The led is off
-        if (curr_ts - prev_ts >= _off_delay) {
-            prev_ts = curr_ts;
+        if (_curr_ts - _prev_ts >= off_delay) {
+            _prev_ts = _curr_ts;
             on();
         }
     }

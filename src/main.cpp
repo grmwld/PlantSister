@@ -2,22 +2,23 @@
 #include <ESP8266WiFi.h>
 #include "ESPAsyncTCP.h"
 #include "ESPAsyncWebServer.h"
-#include "DHT.h"
 #include "main.h"
+#include "AsyncDHT.h"
 #include "Blink.h"
 
 #include "credentials.h"
 
-#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
-
 // DHT Sensor
-const uint8_t DHTPin = D2;
+const uint8_t DHT_PIN = D2;
+const uint8_t DHT_TYPE = DHT22;
+AsyncDHT dht(DHT_PIN, DHT_TYPE);
+
 // LED Indicator
 const uint8_t LED_INDICATOR = D0;
 Led led_indicator(LED_INDICATOR);
                
 // Initialize DHT sensor.
-DHT dht(DHTPin, DHTTYPE);                
+// DHT dht(DHTPin, DHTTYPE);
 
 float temperature;
 float humidity;
@@ -27,28 +28,22 @@ AsyncWebServer server(8080);
 void setup() {
   Serial.begin(9800);
   delay(100);
-
-  pinMode(DHTPin, INPUT);
-  dht.begin();
+  
   connectToWifi();
   setupServer();
-  // led_indicator.setup();
-  temperature = dht.readTemperature(); // Gets temperature value
-  Serial.print("Temperature: "); Serial.print((int)temperature); Serial.println(" *C");
 }
 
 void loop() {
-  // led_indicator.blink(5, 4000);
+  led_indicator.blink(5, 4000);
+  dht.poll();
 }
 
 
 void setupServer(void) {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    temperature = dht.readTemperature(); // Gets temperature value
-    humidity = dht.readHumidity(); // Gets humidity value
-    request->send(200, "text/html", SendHTML(temperature, humidity)); 
-    Serial.print("Temperature: "); Serial.print((int)temperature); Serial.println(" *C");
-    Serial.print("Humidity: "); Serial.print((int)humidity); Serial.println(" %");
+    request->send(200, "text/html", SendHTML(dht.getTemperature(), dht.getHumidity())); 
+    Serial.print("Temperature: "); Serial.print((int)dht.getTemperature()); Serial.println(" *C");
+    Serial.print("Humidity: "); Serial.print((int)dht.getHumidity()); Serial.println(" %");
   });
   server.begin();
   Serial.println("HTTP server started");
