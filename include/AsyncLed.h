@@ -1,5 +1,5 @@
-#ifndef BLINK_H
-#define BLINK_H
+#ifndef ASYNCLED_H
+#define ASYNCLED_H
 
 #include <Arduino.h>
 #include "AsyncPin.h"

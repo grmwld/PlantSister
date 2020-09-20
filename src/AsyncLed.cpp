@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "Blink.h"
+#include "AsyncLed.h"
 
 Led::Led(uint8_t pin) : AsyncPin(pin, OUTPUT) {
     init();
