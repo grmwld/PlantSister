@@ -61,6 +61,7 @@ void setupServer(void) {
 String SendHTML(float temperature, float humidity, String last_update) {
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
+  ptr +="<meta http-equiv=\"refresh\" content=\"30\">";
   ptr +="<title>Plant Sister</title>\n";
   ptr +="<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
   ptr +="body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;}\n";
