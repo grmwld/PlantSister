@@ -18,8 +18,9 @@ public:
     void init();
     void getReadings();
     void poll(
-        unsigned long poll_delay=5000,
-        unsigned long cycle_delay=50);
+        unsigned long poll_delay,
+        unsigned long cycle_delay,
+        const std::function <void ()>& f);
 
     float getTemperature() {return _temperature;}
     float getHumidity() {return _humidity;}

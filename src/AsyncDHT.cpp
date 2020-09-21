@@ -17,10 +17,11 @@ void AsyncDHT::getReadings() {
     _humidity = _dht.readHumidity(); // Gets humidity value
 }
 
-void AsyncDHT::poll(unsigned long poll_delay, unsigned long cycle_delay) {
+void AsyncDHT::poll(unsigned long poll_delay, unsigned long cycle_delay, const std::function <void ()>& f) {
     delay(cycle_delay);
     _curr_ts = millis();
-    if (_curr_ts - _prev_ts >= poll_delay) {
+    if ((_curr_ts - _prev_ts >= poll_delay) || (_prev_ts == 0)) {
         getReadings();
+        return f();
     }
- }
+}
