@@ -2,6 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <ArduinoOTA.h>
 #include "ESPAsyncTCP.h"
 #include "ESPAsyncWebServer.h"
 #include "main.h"
@@ -25,8 +26,8 @@ const uint8_t LED_INDICATOR = D0;
 Led led_indicator(LED_INDICATOR);
 
 // Date & time related settings
-const long utcOffsetInSeconds = 3600 * 2;
-const long updateInterval = 3600 * 24;
+const long utcOffsetInSeconds = 2 * 3600;
+const long updateInterval = 24 * 3600;
 String lastUpdateFormatedTime;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds, updateInterval);
@@ -44,16 +45,20 @@ void setup() {
     Serial.println("An Error has occurred while mounting SPIFFS");
     return;
   }
+
+  setupOTA();
+
   setupServer();
 }
 
 void loop() {
+  ArduinoOTA.handle();
   led_indicator.blink(10, 4000);
-  dht.poll(5*60*1000, 100, []() {
+  dht.poll(5*60*1000, 10, []() {
     timeClient.update();
     lastUpdateFormatedTime = timeClient.getFormattedTime();
   });
-  csm.poll(15*60*1000, 100, []() {
+  csm.poll(15*60*1000, 10, []() {
   // csm.poll(5*1000, 10, []() {
     timeClient.update();
     lastUpdateFormatedTime = timeClient.getFormattedTime();
@@ -62,6 +67,31 @@ void loop() {
   });
 }
 
+
+void setupOTA() {
+  ArduinoOTA.setHostname("PlantSister");
+  ArduinoOTA.setPassword("iswatchingyou");
+
+  ArduinoOTA.onStart([]() {
+    Serial.println("OTA Start");
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nOTA End");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+  ArduinoOTA.begin();
+  Serial.println("OTA ready");
+}
 
 void setupServer(void) {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
