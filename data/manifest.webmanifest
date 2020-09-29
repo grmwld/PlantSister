@@ -1,0 +1,19 @@
+{
+    "short_name": "Plant Sister",
+    "name": "Plant Sister: Keep an eye on your plants",
+    "description": "Logs environmental parameters for your plants",
+    "icons": [{
+            "src": "icons-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "icons-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/?source=pwa",
+    "display": "standalone",
+    "scope": "/"
+}

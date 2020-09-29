@@ -1,0 +1,23 @@
+html {
+    font-family: Helvetica;
+    display: inline-block;
+    margin: 0px auto;
+    text-align: center;
+}
+
+h1 {
+    padding: 2vh;
+}
+
+p {
+    font-size: 1.5rem;
+    color: #444444;
+}
+
+.units {
+    font-size: 1.2rem;
+}
+
+.sensor-labels {
+    font-size: 1.5rem;
+}
