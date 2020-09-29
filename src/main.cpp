@@ -100,10 +100,22 @@ void setupServer(void) {
     Serial.print("Humidity: "); Serial.print((int)dht.getHumidity()); Serial.println(" %");
     Serial.print("Soil Moisture: "); Serial.print((int)csm.getSoilMoisturePercent()); Serial.println(" %");
   });
-  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "text/plain", ((String)dht.getTemperature()).c_str());
+  });
+  server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "text/plain", ((String)dht.getHumidity()).c_str());
+  });
+  server.on("/moisturepc", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "text/plain", ((String)csm.getSoilMoisturePercent()).c_str());
+  });
+  server.on("/moisturevl", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "text/plain", ((String)csm.getSoilMoistureValue()).c_str());
+  });
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/style.css", "text/css");
   });
-  server.on("/manifest.webmanifest", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/manifest.webmanifest", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/manifest.webmanifest", "application/json");
   });
   server.begin();
@@ -117,8 +129,11 @@ String processor(const String& var) {
   else if (var == "HUMIDITY"){
     return String((int)dht.getHumidity());
   }
-  else if (var == "MOISTURE"){
+  else if (var == "MOISTUREPC"){
     return String((int)csm.getSoilMoisturePercent());
+  }
+  else if (var == "MOISTUREVL"){
+    return String((int)csm.getSoilMoistureValue());
   }
   else if (var == "LAST_UPDATE"){
     return lastUpdateFormatedTime;
