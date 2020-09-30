@@ -26,12 +26,11 @@ const uint8_t LED_INDICATOR = D0;
 Led led_indicator(LED_INDICATOR);
 
 // Date & time related settings
-const long utcOffsetInSeconds = 2 * 3600;
-const long updateInterval = 24 * 3600;
-String lastUpdateFormatedTime;
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds, updateInterval);
-char daysOfTheWeek[7][12] = {"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"};
+// const long utcOffsetInSeconds = 2 * 3600;
+// const long updateInterval = 24 * 3600;
+// String lastUpdateFormatedTime;
+// WiFiUDP ntpUDP;
+// NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds, updateInterval);
 
 AsyncWebServer server(8080);
 
@@ -40,7 +39,7 @@ void setup() {
   delay(100);
   
   connectToWifi();
-  timeClient.begin();
+  // timeClient.begin();
   if (!SPIFFS.begin()) {
     Serial.println("An Error has occurred while mounting SPIFFS");
     return;
@@ -54,14 +53,13 @@ void setup() {
 void loop() {
   ArduinoOTA.handle();
   led_indicator.blink(10, 4000);
-  dht.poll(5*60*1000, 10, []() {
-    timeClient.update();
-    lastUpdateFormatedTime = timeClient.getFormattedTime();
+  dht.poll(1*60*1000, 10, []() {
+    // timeClient.update();
+    // lastUpdateFormatedTime = timeClient.getFormattedTime();
   });
-  csm.poll(15*60*1000, 10, []() {
-  // csm.poll(5*1000, 10, []() {
-    timeClient.update();
-    lastUpdateFormatedTime = timeClient.getFormattedTime();
+  csm.poll(1*60*1000, 10, []() {
+    // timeClient.update();
+    // lastUpdateFormatedTime = timeClient.getFormattedTime();
     // Serial.print("Soil Moisture: "); Serial.println((int)csm.getSoilMoistureValue());
     // Serial.print("Soil Moisture: "); Serial.print((int)csm.getSoilMoisturePercent()); Serial.println(" %");
   });
@@ -95,7 +93,7 @@ void setupOTA() {
 
 void setupServer(void) {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/index.html", "text/html", false, processor);
+    request->send(SPIFFS, "/index.html", "text/html");
     Serial.print("Temperature: "); Serial.print((int)dht.getTemperature()); Serial.println(" *C");
     Serial.print("Humidity: "); Serial.print((int)dht.getHumidity()); Serial.println(" %");
     Serial.print("Soil Moisture: "); Serial.print((int)csm.getSoilMoisturePercent()); Serial.println(" %");
@@ -112,6 +110,12 @@ void setupServer(void) {
   server.on("/moisturevl", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send_P(200, "text/plain", ((String)csm.getSoilMoistureValue()).c_str());
   });
+  server.on("/highcharts.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/highcharts.js", "text/javascript");
+  });
+  server.on("/plot-data.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/plot-data.js", "text/javascript");
+  });
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/style.css", "text/css");
   });
@@ -121,25 +125,6 @@ void setupServer(void) {
   server.begin();
   Serial.println("HTTP server started");
 }
-
-String processor(const String& var) {
-  if (var == "TEMPERATURE"){
-    return String((int)dht.getTemperature());
-  }
-  else if (var == "HUMIDITY"){
-    return String((int)dht.getHumidity());
-  }
-  else if (var == "MOISTUREPC"){
-    return String((int)csm.getSoilMoisturePercent());
-  }
-  else if (var == "MOISTUREVL"){
-    return String((int)csm.getSoilMoistureValue());
-  }
-  else if (var == "LAST_UPDATE"){
-    return lastUpdateFormatedTime;
-  }
-}
-
 
 void connectToWifi() {
   Serial.println("Connecting to ");

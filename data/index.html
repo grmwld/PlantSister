@@ -3,40 +3,23 @@
 
 <head>
     <title>Plant Sister</title>
+    <meta charset="UTF-8">
     <meta name=viewport content=width=device-width, initial-scale=1.0, user-scalable=no>
-    <meta http-equiv=refresh content=30>
     <link rel="stylesheet" type="text/css" href="/style.css">
     <link rel="manifest" href="/manifest.webmanifest">
+    <script type="text/javascript" src="highcharts.js"></script>
 </head>
 
 <body>
     <div id=webpage>
         <h1>Plant Sister</h1>
-        <p>
-            <span class="sensor-labels">Temperature:</span>
-            <span id="temperature">%TEMPERATURE%</span>
-            <sup class="units">&deg;C</sup>
-        </p>
-        <p>
-            <span class="sensor-labels">Relative Humidity:</span>
-            <span id="humidity">%HUMIDITY%</span>
-            <sup class="units">&#37;</sup>
-        </p>
-        <p>
-            <span class="sensor-labels">Soil Moisture Percent:</span>
-            <span id="humidity">%MOISTUREPC%</span>
-            <sup class="units">&#37;</sup>
-        </p>
-        <p>
-            <span class="sensor-labels">Soil Moisture Value:</span>
-            <span id="humidity">%MOISTUREVL%</span>
-        </p>
-        <p>
-            <span class="metadata-labels">Last update:</span>
-            <span id="last_update">%LAST_UPDATE%</span>
-        </p>
-
+        <div id="chart-temperature" class="container"></div>
+        <div id="chart-humidity" class="container"></div>
+        <div id="chart-moisturepc" class="container"></div>
+        <div id="chart-moisturevl" class="container"></div>
     </div>
 </body>
+
+<script type="text/javascript" src="plot-data.js"></script>
 
 </html>
