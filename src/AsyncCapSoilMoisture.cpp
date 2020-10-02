@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "AsyncCapSoilMoisture.h"
 
 AsyncCapSoilMoisture::AsyncCapSoilMoisture(uint8_t pin) : AsyncPin(pin, INPUT) {

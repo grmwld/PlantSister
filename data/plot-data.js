@@ -31,7 +31,6 @@ function update_temperature_chart() {
         if (this.readyState == 4 && this.status == 200) {
             var x = (new Date()).getTime(),
                 y = parseFloat(this.responseText);
-            console.log(this.responseText);
             if (chartT.series[0].data.length > 96) {
                 chartT.series[0].addPoint([x, y], true, true, true);
             } else {
@@ -49,7 +48,6 @@ function update_humidity_chart() {
         if (this.readyState == 4 && this.status == 200) {
             var x = (new Date()).getTime(),
                 y = parseFloat(this.responseText);
-            console.log(this.responseText);
             if (chartH.series[0].data.length > 96) {
                 chartH.series[0].addPoint([x, y], true, true, true);
             } else {
@@ -67,7 +65,6 @@ function update_moisturepc_chart() {
         if (this.readyState == 4 && this.status == 200) {
             var x = (new Date()).getTime(),
                 y = parseFloat(this.responseText);
-            console.log(this.responseText);
             if (chartMP.series[0].data.length > 96) {
                 chartMP.series[0].addPoint([x, y], true, true, true);
             } else {
@@ -85,7 +82,6 @@ function update_moisturevl_chart() {
         if (this.readyState == 4 && this.status == 200) {
             var x = (new Date()).getTime(),
                 y = parseFloat(this.responseText);
-            console.log(this.responseText);
             if (chartMV.series[0].data.length > 96) {
                 chartMV.series[0].addPoint([x, y], true, true, true);
             } else {
