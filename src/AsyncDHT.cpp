@@ -13,10 +13,8 @@ void AsyncDHT::init() {
 
 void AsyncDHT::getReadings() {
     _prev_ts = _curr_ts;
-    float t = _dht.readTemperature();
-    float h = _dht.readHumidity();
-    _temperature = isnan(t) ? _temperature : t; // Gets temperature value
-    _humidity = isnan(h) ? _temperature : h; // Gets humidity value
+    _temperature = _dht.readTemperature(); // Gets temperature value
+    _humidity = _dht.readHumidity(); // Gets humidity value
 }
 
 void AsyncDHT::poll(unsigned long poll_delay, unsigned long cycle_delay, const std::function <void ()>& f) {

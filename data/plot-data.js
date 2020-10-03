@@ -29,8 +29,9 @@ function update_temperature_chart() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            var x = (new Date()).getTime(),
-                y = parseFloat(this.responseText);
+            var data = JSON.parse(this.responseText);
+            var x = data["timestamp"]*1000,
+                y = data["value"];
             if (chartT.series[0].data.length > 96) {
                 chartT.series[0].addPoint([x, y], true, true, true);
             } else {
@@ -38,7 +39,7 @@ function update_temperature_chart() {
             }
         }
     };
-    xhttp.open("GET", "/temperature", true);
+    xhttp.open("GET", "/temperature/last", true);
     xhttp.send();
 }
 
@@ -46,8 +47,9 @@ function update_humidity_chart() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            var x = (new Date()).getTime(),
-                y = parseFloat(this.responseText);
+            var data = JSON.parse(this.responseText);
+            var x = data["timestamp"]*1000,
+                y = data["value"];
             if (chartH.series[0].data.length > 96) {
                 chartH.series[0].addPoint([x, y], true, true, true);
             } else {
@@ -55,7 +57,7 @@ function update_humidity_chart() {
             }
         }
     };
-    xhttp.open("GET", "/humidity", true);
+    xhttp.open("GET", "/humidity/last", true);
     xhttp.send();
 }
 
@@ -63,8 +65,9 @@ function update_moisturepc_chart() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            var x = (new Date()).getTime(),
-                y = parseFloat(this.responseText);
+            var data = JSON.parse(this.responseText);
+            var x = data["timestamp"]*1000,
+                y = data["value"];
             if (chartMP.series[0].data.length > 96) {
                 chartMP.series[0].addPoint([x, y], true, true, true);
             } else {
@@ -72,7 +75,7 @@ function update_moisturepc_chart() {
             }
         }
     };
-    xhttp.open("GET", "/moisturepc", true);
+    xhttp.open("GET", "/moisturepc/last", true);
     xhttp.send();
 }
 
@@ -80,8 +83,9 @@ function update_moisturevl_chart() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            var x = (new Date()).getTime(),
-                y = parseFloat(this.responseText);
+            var data = JSON.parse(this.responseText);
+            var x = data["timestamp"]*1000,
+                y = data["value"];
             if (chartMV.series[0].data.length > 96) {
                 chartMV.series[0].addPoint([x, y], true, true, true);
             } else {
@@ -89,7 +93,7 @@ function update_moisturevl_chart() {
             }
         }
     };
-    xhttp.open("GET", "/moisturevl", true);
+    xhttp.open("GET", "/moisturevl/last", true);
     xhttp.send();
 }
 

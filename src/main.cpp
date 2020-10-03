@@ -12,7 +12,6 @@
 #include "AsyncLed.h"
 #include "AsyncCapSoilMoisture.h"
 #include "DataPoints.h"
-#include "Record.h"
 
 #include "credentials.h"
 
@@ -30,7 +29,7 @@ const uint8_t LED_INDICATOR = D0;
 Led led_indicator(LED_INDICATOR);
 
 // Date & time related settings
-const long utcOffsetInSeconds = 0 * 3600;
+const long utcOffsetInSeconds = 2 * 3600;
 const long updateInterval = 24 * 3600;
 unsigned long lastUpdateEpoch;
 String lastUpdateFormatedTime;
@@ -38,10 +37,11 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds, updateInterval);
 
 // Semi persistent data
-DataPoints<Record*, 96> temperatureRecords;
-DataPoints<Record*, 96> humidityRecords;
-DataPoints<Record*, 96> moisturepcRecords;
-DataPoints<Record*, 96> moisturevlRecords;
+// #define MAX_RECORDS 96
+DataPoints temperatureRecords;
+DataPoints humidityRecords;
+DataPoints moisturepcRecords;
+DataPoints moisturevlRecords;
 
 AsyncWebServer server(8080);
 
@@ -69,14 +69,14 @@ void setup() {
 void loop() {
   ArduinoOTA.handle();
   led_indicator.blink(10, 4000);
-  dht.poll(1*60*1000, 10, []() {
+  dht.poll(1*55*1000, 10, []() {
     timeClient.update();
     lastUpdateFormatedTime = timeClient.getFormattedTime();
     lastUpdateEpoch = timeClient.getEpochTime();
     temperatureRecords.push(new Record(dht.getTemperature(), lastUpdateEpoch));
     humidityRecords.push(new Record(dht.getHumidity(), lastUpdateEpoch));
   });
-  csm.poll(1*60*1000, 10, []() {
+  csm.poll(1*55*1000, 10, []() {
     timeClient.update();
     lastUpdateFormatedTime = timeClient.getFormattedTime();
     lastUpdateEpoch = timeClient.getEpochTime();
@@ -118,36 +118,29 @@ void setupServer(void) {
     Serial.print("Humidity: "); Serial.print((int)dht.getHumidity()); Serial.println(" %");
     Serial.print("Soil Moisture: "); Serial.print((int)csm.getSoilMoisturePercent()); Serial.println(" %");
   });
-  // server.on("/temperature/history", HTTP_GET, [](AsyncWebServerRequest *request) {
-  //   // String jsonstring = temperatureRecords[0]->serializeToString();
-  //   Serial.print("Size of dataset: "); Serial.println(temperatureRecords.size());
-  //   for (int i = 0; i < temperatureRecords.size(); i++) {
-  //     Serial.print("item from inloop: "); Serial.println(temperatureRecords[i]->timestamp());
-  //     temperatureRecords[i]->print();
-  //   }
-  //   temperatureRecords.print();
-  //   request->send(200, "application/json", temperatureRecords[0]->serializeToString().c_str());
-  // });
-  server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/temperature/last", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send_P(200, "application/json", temperatureRecords.last()->serializeToString().c_str());
   });
-  // server.on("/humidity/history", HTTP_GET, [](AsyncWebServerRequest *request) {
-  //   request->send(200, "application/json", humidityRecords.serialize().c_str());
-  // });
-  // server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request) {
-  //   request->send_P(200, "text/plain", ((String)dht.getHumidity()).c_str());
-  // });
-  // server.on("/moisturepc/history", HTTP_GET, [](AsyncWebServerRequest *request) {
-  //   request->send(200, "application/json", moisturepcRecords.serialize().c_str());
-  // });
-  // server.on("/moisturepc", HTTP_GET, [](AsyncWebServerRequest *request) {
-  //   request->send_P(200, "text/plain", ((String)csm.getSoilMoisturePercent()).c_str());
-  // });
-  // server.on("/moisturevl/history", HTTP_GET, [](AsyncWebServerRequest *request) {
-  //   request->send(200, "application/json", moisturevlRecords.serialize().c_str());
-  // });
-  server.on("/moisturevl", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send_P(200, "text/plain", ((String)csm.getSoilMoistureValue()).c_str());
+  server.on("/temperature/history", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "application/json", temperatureRecords.serializeToString().c_str());
+  });
+  server.on("/humidity/last", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "application/json", humidityRecords.last()->serializeToString().c_str());
+  });
+  server.on("/humidity/history", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "application/json", humidityRecords.serializeToString().c_str());
+  });
+  server.on("/moisturepc/last", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "application/json", moisturepcRecords.last()->serializeToString().c_str());
+  });
+  server.on("/moisturepc/history", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "application/json", moisturepcRecords.serializeToString().c_str());
+  });
+  server.on("/moisturevl/last", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "application/json", moisturevlRecords.last()->serializeToString().c_str());
+  });
+  server.on("/moisturevl/history", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "application/json", moisturevlRecords.serializeToString().c_str());
   });
   server.on("/highcharts.js", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/highcharts.js", "text/javascript");
