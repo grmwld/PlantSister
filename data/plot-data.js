@@ -25,76 +25,42 @@ function init_chart_data(renderTo, title, yAxis_title) {
     return chart;
 }
 
-function update_temperature_chart() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            var data = JSON.parse(this.responseText);
-            var x = data["timestamp"]*1000,
-                y = data["value"];
-            if (chartT.series[0].data.length > 96) {
-                chartT.series[0].addPoint([x, y], true, true, true);
-            } else {
-                chartT.series[0].addPoint([x, y], true, false, true);
+function update_chart(method, uri, hichart) {
+    return function() {
+        var xhttp = new XMLHttpRequest();
+        if (hichart.series[0].data.length == 0) {
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.responseText);
+                    data.forEach(datapoint => {
+                        var x = datapoint["timestamp"] * 1000,
+                            y = datapoint["value"];
+                        if (hichart.series[0].data.length > 96) {
+                            hichart.series[0].addPoint([x, y], true, true, true);
+                        } else {
+                            hichart.series[0].addPoint([x, y], true, false, true);
+                        }
+                    });
+                }
             }
-        }
-    };
-    xhttp.open("GET", "/temperature/last", true);
-    xhttp.send();
-}
-
-function update_humidity_chart() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            var data = JSON.parse(this.responseText);
-            var x = data["timestamp"]*1000,
-                y = data["value"];
-            if (chartH.series[0].data.length > 96) {
-                chartH.series[0].addPoint([x, y], true, true, true);
-            } else {
-                chartH.series[0].addPoint([x, y], true, false, true);
+            xhttp.open(method, uri + "/history", true);
+        } else {
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.responseText);
+                    var x = data["timestamp"] * 1000,
+                        y = data["value"];
+                    if (hichart.series[0].data.length > 96) {
+                        hichart.series[0].addPoint([x, y], true, true, true);
+                    } else {
+                        hichart.series[0].addPoint([x, y], true, false, true);
+                    }
+                }
             }
+            xhttp.open(method, uri + "/last", true);
         }
-    };
-    xhttp.open("GET", "/humidity/last", true);
-    xhttp.send();
-}
-
-function update_moisturepc_chart() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            var data = JSON.parse(this.responseText);
-            var x = data["timestamp"]*1000,
-                y = data["value"];
-            if (chartMP.series[0].data.length > 96) {
-                chartMP.series[0].addPoint([x, y], true, true, true);
-            } else {
-                chartMP.series[0].addPoint([x, y], true, false, true);
-            }
-        }
-    };
-    xhttp.open("GET", "/moisturepc/last", true);
-    xhttp.send();
-}
-
-function update_moisturevl_chart() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            var data = JSON.parse(this.responseText);
-            var x = data["timestamp"]*1000,
-                y = data["value"];
-            if (chartMV.series[0].data.length > 96) {
-                chartMV.series[0].addPoint([x, y], true, true, true);
-            } else {
-                chartMV.series[0].addPoint([x, y], true, false, true);
-            }
-        }
-    };
-    xhttp.open("GET", "/moisturevl/last", true);
-    xhttp.send();
+        xhttp.send();
+    }
 }
 
 var chartT = init_chart_data("chart-temperature", "DHT22 Temperature", "Temperature (Celsius)");
@@ -102,12 +68,17 @@ var chartH = init_chart_data("chart-humidity", "DHT22 Humidity", "Relative Humid
 var chartMP = init_chart_data("chart-moisturepc", "Soil Moisture", "Soil Moisture (%)");
 var chartMV = init_chart_data("chart-moisturevl", "Soil Moisture", "Soil Moisture (A.U.)");
 
+update_temperature_chart = update_chart("GET", "./temperature", chartT);
+update_humidity_chart = update_chart("GET", "./humidity", chartH);
+update_moisturepc_chart = update_chart("GET", "./moisturepc", chartMP);
+update_moisturevl_chart = update_chart("GET", "./moisturevl", chartMV);
+
 update_temperature_chart();
 update_humidity_chart();
 update_moisturepc_chart();
 update_moisturevl_chart();
 
-setInterval(update_temperature_chart, 1*60*1000);
-setInterval(update_humidity_chart, 1*60*1000);
-setInterval(update_moisturepc_chart, 1*60*1000);
-setInterval(update_moisturevl_chart, 1*60*1000);
+setInterval(update_temperature_chart, 1 * 60 * 1000);
+setInterval(update_humidity_chart, 1 * 60 * 1000);
+setInterval(update_moisturepc_chart, 1 * 60 * 1000);
+setInterval(update_moisturevl_chart, 1 * 60 * 1000);
