@@ -14,6 +14,7 @@ private:
 
 public:
     Record(float value, unsigned long timestamp);
+    ~Record() {};
 
     JsonDocument serialize();
     String serializeToString();

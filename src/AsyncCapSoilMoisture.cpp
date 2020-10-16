@@ -5,8 +5,8 @@ AsyncCapSoilMoisture::AsyncCapSoilMoisture(uint8_t pin) : AsyncPin(pin, INPUT) {
 }
 
 void AsyncCapSoilMoisture::init() {
-    _airMoistureValue = 700.0;
-    _waterMoistureValue = 350.0;
+    _airMoistureValue = 650.0;
+    _waterMoistureValue = 330.0;
 }
 
 void AsyncCapSoilMoisture::getReadings() {

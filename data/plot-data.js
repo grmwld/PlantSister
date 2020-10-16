@@ -9,7 +9,7 @@ function init_chart_data(renderTo, title, yAxis_title) {
         plotOptions: {
             line: {
                 animation: false,
-                dataLabels: { enabled: true }
+                dataLabels: { enabled: false }
             },
             series: { color: '#059e8a' }
         },
@@ -34,7 +34,7 @@ function update_chart(method, uri, hichart) {
                     var data = JSON.parse(this.responseText);
                     data.forEach(datapoint => {
                         var x = datapoint["timestamp"] * 1000,
-                            y = datapoint["value"];
+                            y = round(datapoint["value"], 1);
                         if (hichart.series[0].data.length > 96) {
                             hichart.series[0].addPoint([x, y], true, true, true);
                         } else {
@@ -49,7 +49,7 @@ function update_chart(method, uri, hichart) {
                 if (this.readyState == 4 && this.status == 200) {
                     var data = JSON.parse(this.responseText);
                     var x = data["timestamp"] * 1000,
-                        y = data["value"];
+                        y = round(data["value"], 1);
                     if (hichart.series[0].data.length > 96) {
                         hichart.series[0].addPoint([x, y], true, true, true);
                     } else {
@@ -61,6 +61,10 @@ function update_chart(method, uri, hichart) {
         }
         xhttp.send();
     }
+}
+
+function round(value, decimals) {
+    return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
 }
 
 var chartT = init_chart_data("chart-temperature", "DHT22 Temperature", "Temperature (Celsius)");
@@ -78,7 +82,7 @@ update_humidity_chart();
 update_moisturepc_chart();
 update_moisturevl_chart();
 
-setInterval(update_temperature_chart, 1 * 60 * 1000);
-setInterval(update_humidity_chart, 1 * 60 * 1000);
-setInterval(update_moisturepc_chart, 1 * 60 * 1000);
-setInterval(update_moisturevl_chart, 1 * 60 * 1000);
+setInterval(update_temperature_chart, 5 * 60 * 1000);
+setInterval(update_humidity_chart, 5 * 60 * 1000);
+setInterval(update_moisturepc_chart, 15 * 60 * 1000);
+setInterval(update_moisturevl_chart, 15 * 60 * 1000);

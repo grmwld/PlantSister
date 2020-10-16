@@ -69,19 +69,37 @@ void setup() {
 void loop() {
   ArduinoOTA.handle();
   led_indicator.blink(10, 4000);
-  dht.poll(1*55*1000, 10, []() {
+  dht.poll(5*59*1000, 10, []() {
     timeClient.update();
-    lastUpdateFormatedTime = timeClient.getFormattedTime();
     lastUpdateEpoch = timeClient.getEpochTime();
-    temperatureRecords.push(new Record(dht.getTemperature(), lastUpdateEpoch));
-    humidityRecords.push(new Record(dht.getHumidity(), lastUpdateEpoch));
+    if (temperatureRecords.isFull()) {
+      Record* current = temperatureRecords.shift();
+      delete current;
+    }
+    Record* trecord = new Record(dht.getTemperature(), lastUpdateEpoch);
+    temperatureRecords.push(trecord);
+    if (humidityRecords.isFull()) {
+      Record* current = humidityRecords.shift();
+      delete current;
+    }
+    Record* hrecord = new Record(dht.getHumidity(), lastUpdateEpoch);
+    humidityRecords.push(hrecord);
   });
-  csm.poll(1*55*1000, 10, []() {
+  csm.poll(15*59*1000, 10, []() {
     timeClient.update();
-    lastUpdateFormatedTime = timeClient.getFormattedTime();
     lastUpdateEpoch = timeClient.getEpochTime();
-    moisturepcRecords.push(new Record(csm.getSoilMoisturePercent(), lastUpdateEpoch));
-    moisturevlRecords.push(new Record(csm.getSoilMoistureValue(), lastUpdateEpoch));
+    if (moisturepcRecords.isFull()) {
+      Record* current = moisturepcRecords.shift();
+      delete current;
+    }
+    Record* mpcrecord = new Record(csm.getSoilMoisturePercent(), lastUpdateEpoch);
+    moisturepcRecords.push(mpcrecord);
+    if (moisturevlRecords.isFull()) {
+      Record* current = moisturevlRecords.shift();
+      delete current;
+    }
+    Record* mvlrecord = new Record(csm.getSoilMoistureValue(), lastUpdateEpoch);
+    moisturevlRecords.push(mvlrecord);
   });
 }
 
